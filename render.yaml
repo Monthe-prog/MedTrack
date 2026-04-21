@@ -7,13 +7,35 @@ services:
     envVars:
       - key: PORT
         value: 8080
-      - key: DATABASE_URL
+      - key: DB_HOST
         fromDatabase:
           name: medtrack-db
-          property: connectionString
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: medtrack-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: medtrack-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: medtrack-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: medtrack-db
+          property: password
       - key: FIREBASE_PROJECT_ID
-        sync: false
+        value: "medtrack-8b6a1"
       - key: FIREBASE_SERVICE_ACCOUNT_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
         sync: false
     healthCheckPath: /health
 
