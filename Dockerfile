@@ -5,9 +5,9 @@ WORKDIR /home/gradle/src/backend
 RUN gradle buildFatJar --no-daemon
 
 # Stage 2: Run the application
-FROM openjdk:17-slim
+# Using Eclipse Temurin for better stability and smaller image size
+FROM eclipse-temurin:17-jre-alpine
 EXPOSE 8080
 RUN mkdir /app
-# We look into the backend/build folder specifically
 COPY --from=build /home/gradle/src/backend/build/libs/*.jar /app/medtrack-backend.jar
 ENTRYPOINT ["java", "-jar", "/app/medtrack-backend.jar"]
