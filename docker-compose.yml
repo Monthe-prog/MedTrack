@@ -1,0 +1,175 @@
+version: "3.9"
+
+# =============================================================================
+# MedTrack – Docker Compose Orchestration
+# Package: com.joechrist.medtrack
+# Services: Ktor API · PostgreSQL · MinIO · Gotenberg · pgAdmin (dev only)
+# =============================================================================
+
+networks:
+  medtrack-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data:
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # 1. PostgreSQL – Primary Relational Database
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: medtrack_postgres
+    restart: unless-stopped
+    networks:
+      - medtrack-net
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB}
+      POSTGRES_USER:     ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro   # runs schema.sql on first boot
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # 2. MinIO – S3-Compatible Object Storage (profile pictures · PDFs)
+  # ---------------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: medtrack_minio
+    restart: unless-stopped
+    networks:
+      - medtrack-net
+    environment:
+      MINIO_ROOT_USER:     ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"     # S3 API
+      - "${MINIO_CONSOLE_PORT:-9001}:9001" # Web console
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # MinIO bucket bootstrap (runs once, creates default buckets)
+  minio-init:
+    image: minio/mc:latest
+    container_name: medtrack_minio_init
+    networks:
+      - medtrack-net
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+        mc mb --ignore-existing local/${MINIO_BUCKET_PROFILES};
+        mc mb --ignore-existing local/${MINIO_BUCKET_PRESCRIPTIONS};
+        mc anonymous set download local/${MINIO_BUCKET_PROFILES};
+        echo 'MinIO buckets ready.';
+      "
+    restart: on-failure
+
+  # ---------------------------------------------------------------------------
+  # 3. Gotenberg – PDF Generation Engine (HTML → PDF via Chromium)
+  # ---------------------------------------------------------------------------
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: medtrack_gotenberg
+    restart: unless-stopped
+    networks:
+      - medtrack-net
+    ports:
+      - "${GOTENBERG_PORT:-3000}:3000"
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=false"
+      - "--chromium-allow-list=file:///.*"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # 4. Ktor API – Backend Application
+  # ---------------------------------------------------------------------------
+  ktor-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: medtrack_ktor
+    restart: unless-stopped
+    networks:
+      - medtrack-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      gotenberg:
+        condition: service_healthy
+    environment:
+      # App
+      APP_ENV:            ${APP_ENV:-production}
+      APP_PORT:           ${APP_PORT:-8080}
+      APP_SECRET:         ${APP_SECRET}
+      # Database
+      DB_HOST:            postgres
+      DB_PORT:            5432
+      DB_NAME:            ${POSTGRES_DB}
+      DB_USER:            ${POSTGRES_USER}
+      DB_PASSWORD:        ${POSTGRES_PASSWORD}
+      # MinIO
+      MINIO_ENDPOINT:     http://minio:9000
+      MINIO_ACCESS_KEY:   ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY:   ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_PROFILES:      ${MINIO_BUCKET_PROFILES}
+      MINIO_BUCKET_PRESCRIPTIONS: ${MINIO_BUCKET_PRESCRIPTIONS}
+      # Gotenberg
+      GOTENBERG_URL:      http://gotenberg:3000
+      # Firebase
+      FIREBASE_PROJECT_ID:         ${FIREBASE_PROJECT_ID}
+      FIREBASE_SERVICE_ACCOUNT_KEY: ${FIREBASE_SERVICE_ACCOUNT_KEY}
+      # openFDA
+      OPENFDA_API_KEY:    ${OPENFDA_API_KEY}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    volumes:
+      - ./backend/resources/firebase:/app/firebase:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # 5. pgAdmin – Database GUI (dev profile only; disable in production)
+  # ---------------------------------------------------------------------------
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: medtrack_pgadmin
+    restart: unless-stopped
+    networks:
+      - medtrack-net
+    profiles: ["dev"]
+    environment:
+      PGADMIN_DEFAULT_EMAIL:    ${PGADMIN_EMAIL:-admin@medtrack.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres

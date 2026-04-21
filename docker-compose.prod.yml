@@ -1,0 +1,101 @@
+version: "3.9"
+
+# =============================================================================
+# MedTrack – docker-compose.prod.yml
+# Production overlay. Use with:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Adds:
+#  • Nginx reverse proxy (SSL termination, rate limiting, WS upgrade)
+#  • Certbot (Let's Encrypt auto-renewal)
+#  • Resource limits on all services
+#  • Restart policies hardened to always
+# =============================================================================
+
+networks:
+  medtrack-net:
+    driver: bridge
+
+volumes:
+  certbot_certs:
+  certbot_challenge:
+
+services:
+
+  # ── Nginx ─────────────────────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: medtrack_nginx
+    restart: always
+    networks:
+      - medtrack-net
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/proxy_params:/etc/nginx/proxy_params:ro
+      - certbot_certs:/etc/letsencrypt:ro
+      - certbot_challenge:/var/www/certbot:ro
+    environment:
+      NGINX_HOST: ${NGINX_HOST}
+    depends_on:
+      ktor-api:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+
+  # ── Certbot (Let's Encrypt) ────────────────────────────────────────────────
+  certbot:
+    image: certbot/certbot:latest
+    container_name: medtrack_certbot
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_challenge:/var/www/certbot
+    # Renew every 12 hours; Certbot skips if cert not near expiry
+    entrypoint: >
+      /bin/sh -c "
+        trap exit TERM;
+        while :; do
+          certbot renew --webroot -w /var/www/certbot --quiet;
+          sleep 12h & wait $${!};
+        done
+      "
+
+  # ── Service resource limits ────────────────────────────────────────────────
+  postgres:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+
+  minio:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+  gotenberg:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+
+  ktor-api:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    # Don't expose port directly in production (Nginx handles it)
+    ports: !reset []
