@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base app theme (used by Compose — no window chrome styling needed) -->
+    <style name="Theme.MedTrack" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <!--
+        Splash screen theme — shown before setContent() in MainActivity.
+        Uses the SplashScreen API (androidx.core:core-splashscreen).
+        windowSplashScreenBackground → navy brand colour (#0F3460)
+        windowSplashScreenAnimatedIcon → the Rx logo drawable
+    -->
+    <style name="Theme.MedTrack.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#0F3460</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="windowSplashScreenAnimationDuration">300</item>
+        <item name="postSplashScreenTheme">@style/Theme.MedTrack</item>
+    </style>
+
+</resources>

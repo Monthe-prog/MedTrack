@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launcher icon background (navy) -->
+    <color name="ic_launcher_background">#0F3460</color>
+
+    <!-- Brand palette (mirrored from Theme.kt for XML usage) -->
+    <color name="navy_900">#0F3460</color>
+    <color name="navy_700">#16508A</color>
+    <color name="teal_500">#1DB98A</color>
+    <color name="teal_900">#085041</color>
+    <color name="coral_500">#E8593C</color>
+    <color name="white">#FFFFFF</color>
+    <color name="neutral_900">#1A1A2E</color>
+    <color name="neutral_50">#F6F8FC</color>
+</resources>

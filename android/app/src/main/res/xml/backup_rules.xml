@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    MedTrack – backup_rules.xml (Android 11 and below)
+    Excludes sensitive local data from cloud backup.
+    PHI must NEVER leave the device via auto-backup.
+-->
+<full-backup-content>
+    <!-- Exclude the entire Room database (contains PHI) -->
+    <exclude domain="database" path="medtrack.db"/>
+    <exclude domain="database" path="medtrack.db-shm"/>
+    <exclude domain="database" path="medtrack.db-wal"/>
+
+    <!-- Exclude DataStore session prefs (Firebase tokens, role) -->
+    <exclude domain="file" path="datastore/"/>
+
+    <!-- Exclude shared preferences -->
+    <exclude domain="sharedpref" path="."/>
+</full-backup-content>

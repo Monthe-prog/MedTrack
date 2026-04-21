@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    MedTrack – Splash screen logo
+    Simple "Rx" prescription symbol in teal on transparent background.
+    Rendered inside the navy splash background defined in themes.xml.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Teal rounded background pill -->
+    <path
+        android:pathData="M20,54 A34,34 0 1,1 88,54 A34,34 0 1,1 20,54 Z"
+        android:fillColor="#1DB98A"/>
+
+    <!-- "Rx" text paths (hand-crafted at 108×108 viewport) -->
+    <!-- R -->
+    <path
+        android:pathData="M36,38 L36,70 M36,38 L48,38 Q56,38 56,46 Q56,54 48,54 L36,54 M48,54 L58,70"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"/>
+
+    <!-- x -->
+    <path
+        android:pathData="M62,54 L74,70 M74,54 L62,70"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"/>
+
+</vector>
