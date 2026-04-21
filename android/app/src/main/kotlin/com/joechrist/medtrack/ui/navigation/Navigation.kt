@@ -75,30 +75,14 @@ fun MedTrackNavHost(
         composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToRegister = { navController.navigate(Screen.Register.route) },
-                onLoginSuccess = { role ->
-                    val dest = if (role == UserRole.PATIENT)
-                        Screen.PatientDashboard.route
-                    else
-                        Screen.DoctorDashboard.route
-                    navController.navigate(dest) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                }
+                onLoginSuccess = { /* Handled by LaunchedEffect in LoginScreen */ }
             )
         }
 
         composable(Screen.Register.route) {
             RegisterScreen(
                 onBack = { navController.popBackStack() },
-                onRegisterSuccess = { role ->
-                    val dest = if (role == UserRole.PATIENT)
-                        Screen.PatientDashboard.route
-                    else
-                        Screen.DoctorDashboard.route
-                    navController.navigate(dest) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                }
+                onRegisterSuccess = { /* Handled by LaunchedEffect in RegisterScreen */ }
             )
         }
 
