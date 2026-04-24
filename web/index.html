@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrack - Medicine Intake Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ============ AUTH SCREEN ============ -->
+    <div id="authScreen" class="screen active">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>MedTrack</h1>
+                <p>Medicine Intake Tracker</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="your@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <select id="role" required>
+                        <option value="">Select your role</option>
+                        <option value="doctor">Doctor</option>
+                        <option value="patient">Patient</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============ DOCTOR SCREEN ============ -->
+    <div id="doctorScreen" class="screen">
+        <div class="dashboard-container">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <h2>🩺 Doctor Dashboard</h2>
+                </div>
+                <div class="dashboard-user">
+                    <span id="doctorEmail"></span>
+                    <button id="doctorLogout" class="btn btn-outline btn-sm">Logout</button>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="prescriptions-tab">Prescriptions</button>
+                <button class="tab-btn" data-tab="patients-tab">Patients</button>
+                <button class="tab-btn" data-tab="doctor-chat-tab">Chat</button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="tab-contents">
+                <!-- Prescriptions Tab -->
+                <div id="prescriptions-tab" class="tab-content active">
+                    <div style="padding: 20px;">
+                        <button id="createPrescriptionBtn" class="btn btn-primary" style="margin-bottom: 20px;">
+                            + New Prescription
+                        </button>
+                        <div id="prescriptionsList"></div>
+                    </div>
+                </div>
+
+                <!-- Patients Tab -->
+                <div id="patients-tab" class="tab-content">
+                    <div style="padding: 20px;">
+                        <div id="patientsList"></div>
+                    </div>
+                </div>
+
+                <!-- Chat Tab -->
+                <div id="doctor-chat-tab" class="tab-content">
+                    <div class="chat-container">
+                        <div class="chat-rooms" id="doctorChatRooms"></div>
+                        
+                        <div id="doctorChatArea" class="chat-area hidden">
+                            <div class="chat-header">
+                                Chat with <span id="doctorChatTitle"></span>
+                            </div>
+                            <div class="chat-messages" id="doctorChatMessages"></div>
+                            <div class="chat-input-area">
+                                <input 
+                                    type="text" 
+                                    id="doctorChatInput" 
+                                    placeholder="Type a message..."
+                                >
+                                <button id="doctorChatSend" class="btn btn-primary btn-sm">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ PATIENT SCREEN ============ -->
+    <div id="patientScreen" class="screen">
+        <div class="dashboard-container">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <h2>💊 Patient Dashboard</h2>
+                </div>
+                <div class="dashboard-user">
+                    <span id="patientEmail"></span>
+                    <button id="patientLogout" class="btn btn-outline btn-sm">Logout</button>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="schedule-tab">Today's Schedule</button>
+                <button class="tab-btn" data-tab="history-tab">30-Day History</button>
+                <button class="tab-btn" data-tab="patient-chat-tab">Chat</button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="tab-contents">
+                <!-- Schedule Tab -->
+                <div id="schedule-tab" class="tab-content active">
+                    <div style="padding: 20px;">
+                        <div class="compliance-container">
+                            <svg class="compliance-ring" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="45" fill="none" stroke="#E5E7EB" stroke-width="8"/>
+                                <circle 
+                                    id="ringProgress"
+                                    cx="60" 
+                                    cy="60" 
+                                    r="45" 
+                                    fill="none" 
+                                    stroke="#3B82F6" 
+                                    stroke-width="8"
+                                    stroke-dasharray="282.7"
+                                    stroke-dashoffset="282.7"
+                                    stroke-linecap="round"
+                                    style="transform: rotate(-90deg); transform-origin: 60px 60px; transition: stroke-dashoffset 0.3s ease;"
+                                />
+                                <text id="compliancePercent" x="60" y="75" text-anchor="middle" font-size="28" font-weight="700" fill="#3B82F6">0%</text>
+                            </svg>
+                            <div class="compliance-label">Today's Compliance</div>
+                        </div>
+
+                        <div id="scheduleList" style="padding: 0 20px;"></div>
+                    </div>
+                </div>
+
+                <!-- History Tab -->
+                <div id="history-tab" class="tab-content">
+                    <div class="history-list" id="historyList"></div>
+                </div>
+
+                <!-- Chat Tab -->
+                <div id="patient-chat-tab" class="tab-content">
+                    <div class="chat-container">
+                        <div class="chat-area">
+                            <div class="chat-header">Chat with Doctor</div>
+                            <div class="chat-messages" id="patientChatMessages"></div>
+                            <div class="chat-input-area">
+                                <input 
+                                    type="text" 
+                                    id="patientChatInput" 
+                                    placeholder="Type a message..."
+                                >
+                                <button id="patientChatSend" class="btn btn-primary btn-sm">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ MODALS ============ -->
+    <div id="modalOverlay" class="modal-overlay hidden"></div>
+
+    <div id="prescriptionModal" class="modal hidden">
+        <div class="modal-header">
+            <h2>Create New Prescription</h2>
+            <button id="closeModalBtn" class="modal-close">&times;</button>
+        </div>
+
+        <form id="prescriptionForm" class="modal-body">
+            <div class="form-group">
+                <label for="rxPatient">Patient</label>
+                <select id="rxPatient" required>
+                    <option value="">Choose a patient</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="rxMedication">Medication Name</label>
+                <input 
+                    type="text" 
+                    id="rxMedication" 
+                    placeholder="e.g., Lisinopril" 
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="rxDosage">Dosage</label>
+                <input 
+                    type="text" 
+                    id="rxDosage" 
+                    placeholder="e.g., 10mg" 
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="rxFrequency">Frequency</label>
+                <select id="rxFrequency" required>
+                    <option value="">Select frequency</option>
+                    <option value="Once daily">Once daily</option>
+                    <option value="Twice daily">Twice daily</option>
+                    <option value="Three times daily">Three times daily</option>
+                    <option value="As needed">As needed</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="rxStartDate">Start Date</label>
+                <input type="date" id="rxStartDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="rxEndDate">End Date</label>
+                <input type="date" id="rxEndDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="rxNotes">Notes</label>
+                <textarea 
+                    id="rxNotes" 
+                    placeholder="Additional notes for the patient..."
+                    style="width: 100%; padding: 10px 12px; border: 2px solid #E5E7EB; border-radius: 6px; font-family: inherit; font-size: 14px; resize: vertical; min-height: 80px;"
+                ></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="cancelModalBtn" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Prescription</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
