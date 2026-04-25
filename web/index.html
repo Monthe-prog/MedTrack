@@ -1,261 +1,1298 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedTrack - Medicine Intake Tracker</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MedTrack</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #1a2e4a;
+    --navy-light: #223659;
+    --teal: #4db899;
+    --teal-dark: #3a9e82;
+    --teal-bg: #e8f7f2;
+    --gray-bg: #f0f2f5;
+    --gray-card: #e8eaed;
+    --gray-text: #6b7280;
+    --gray-border: #d1d5db;
+    --white: #ffffff;
+    --dark: #1f2937;
+    --red: #e05c7a;
+    --blue-btn: #4a90d9;
+    --font: 'DM Sans', sans-serif;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: var(--font);
+    background: var(--gray-bg);
+  }
+
+  #app {
+    width: 100%;
+    height: 100vh;
+    background: var(--white);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ===== SCREENS ===== */
+  .screen {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    background: var(--white);
+  }
+  .screen.active { display: flex; }
+
+  /* ===== STATUS BAR ===== */
+  .status-bar {
+    height: 44px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .status-bar.light { background: var(--white); color: var(--dark); }
+  .status-bar.dark { background: var(--navy); color: var(--white); }
+  .status-icons { display: flex; gap: 6px; align-items: center; font-size: 11px; }
+
+  /* ===== LOGIN SCREEN ===== */
+  #login .status-bar { background: var(--navy); color: white; }
+  .login-hero {
+    background: var(--navy);
+    padding: 40px 28px 50px;
+    flex-shrink: 0;
+  }
+  .app-icon {
+    width: 60px; height: 60px;
+    background: var(--teal);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700; color: white;
+    margin-bottom: 22px;
+    box-shadow: 0 4px 16px rgba(77,184,153,0.4);
+  }
+  .login-hero h1 { font-size: 28px; font-weight: 700; color: white; margin-bottom: 6px; }
+  .login-hero p { font-size: 14px; color: rgba(255,255,255,0.65); }
+
+  .login-body {
+    background: var(--gray-bg);
+    flex: 1;
+    padding: 32px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-radius: 28px 28px 0 0;
+    margin-top: -18px;
+    overflow-y: auto;
+    padding-bottom: 40px;
+  }
+
+  .input-wrap {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 0 16px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1.5px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .input-wrap:focus-within { border-color: var(--teal); }
+  .input-wrap svg { color: var(--gray-text); flex-shrink: 0; }
+  .input-wrap input {
+    flex: 1; border: none; outline: none;
+    font-family: var(--font); font-size: 15px; color: var(--dark);
+    background: transparent;
+  }
+  .input-wrap input::placeholder { color: var(--gray-text); }
+  .eye-btn { background: none; border: none; cursor: pointer; color: var(--gray-text); padding: 0; }
+
+  .btn-signin {
+    height: 54px; border-radius: 14px; border: none;
+    background: var(--gray-card); color: var(--gray-text);
+    font-family: var(--font); font-size: 16px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; margin-top: 4px;
+  }
+  .btn-signin.active {
+    background: var(--teal); color: white;
+    box-shadow: 0 4px 16px rgba(77,184,153,0.35);
+  }
+  .btn-signin.active:hover { background: var(--teal-dark); }
+
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    color: var(--gray-text); font-size: 13px;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--gray-border);
+  }
+
+  .btn-google {
+    height: 54px; border-radius: 14px;
+    border: 1.5px solid var(--gray-border);
+    background: var(--white); color: var(--dark);
+    font-family: var(--font); font-size: 15px; font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: border-color 0.2s;
+  }
+  .btn-google:hover { border-color: #4285F4; }
+  .google-g {
+    width: 20px; height: 20px; font-size: 15px; font-weight: 700; color: #4285F4;
+  }
+
+  .bypass-row { display: flex; gap: 12px; margin-top: 4px; }
+  .btn-bypass {
+    flex: 1; height: 50px; border-radius: 30px; border: none;
+    font-family: var(--font); font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-bypass:hover { opacity: 0.88; }
+  .btn-bypass.doctor { background: var(--red); color: white; }
+  .btn-bypass.patient { background: var(--blue-btn); color: white; }
+
+  /* ===== HOME / DASHBOARD ===== */
+  #home .status-bar { background: var(--navy); color: white; }
+  .home-hero {
+    background: var(--navy);
+    padding: 20px 24px 32px;
+    flex-shrink: 0;
+  }
+  .home-hero .greeting { font-size: 14px; color: rgba(255,255,255,0.65); margin-bottom: 4px; }
+  .home-hero .dr-name { font-size: 22px; font-weight: 700; color: white; margin-bottom: 20px; }
+  .logout-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+  .logout-btn:hover { background: rgba(255,255,255,0.2); }
+
+  .stats-row {
+    display: flex; gap: 10px;
+  }
+  .stat-card {
+    flex: 1; background: rgba(255,255,255,0.1); border-radius: 14px;
+    padding: 16px 12px; text-align: center;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .stat-icon { font-size: 20px; margin-bottom: 6px; }
+  .stat-num { font-size: 22px; font-weight: 700; color: white; line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 11px; color: rgba(255,255,255,0.6); }
+
+  .home-body {
+    background: var(--gray-bg);
+    flex: 1;
+    border-radius: 28px 28px 0 0;
+    margin-top: -16px;
+    overflow-y: auto;
+    padding-bottom: 80px;
+  }
+
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 22px 14px;
+  }
+  .section-header h3 { font-size: 17px; font-weight: 700; color: var(--dark); }
+  .new-rx-link {
+    font-size: 14px; font-weight: 600; color: var(--teal);
+    background: none; border: none; cursor: pointer; font-family: var(--font);
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 40px 24px; text-align: center; gap: 12px;
+  }
+  .empty-icon {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: var(--gray-card);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 4px;
+  }
+  .empty-icon svg { color: #9ca3af; }
+  .empty-state h4 { font-size: 17px; font-weight: 700; color: var(--dark); }
+  .empty-state p { font-size: 14px; color: var(--gray-text); line-height: 1.5; max-width: 220px; }
+
+  .btn-create {
+    height: 50px; border-radius: 30px; border: none;
+    background: var(--teal); color: white;
+    font-family: var(--font); font-size: 15px; font-weight: 600;
+    cursor: pointer; padding: 0 28px; margin-top: 6px;
+    box-shadow: 0 4px 14px rgba(77,184,153,0.35);
+    transition: background 0.2s;
+  }
+  .btn-create:hover { background: var(--teal-dark); }
+
+  .bottom-nav {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 80px;
+    background: var(--white);
+    border-top: 1px solid var(--gray-border);
+    display: flex; align-items: center;
+    padding: 0 10px 10px;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; cursor: pointer; height: 56px; border-radius: 14px;
+    transition: background 0.15s;
+    background: none; border: none; font-family: var(--font);
+  }
+  .nav-item:hover { background: var(--gray-bg); }
+  .nav-item span { font-size: 11px; font-weight: 600; color: var(--gray-text); }
+  .nav-item svg { color: var(--gray-text); }
+  .nav-item.active span { color: var(--teal-dark); }
+  .nav-item.active svg { color: var(--teal-dark); }
+  .nav-pill {
+    background: var(--teal);
+    border-radius: 30px; padding: 8px 18px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .nav-pill svg { color: white; }
+  .nav-pill span { color: white !important; }
+
+  /* ===== PATIENTS SCREEN ===== */
+  #patients .status-bar { background: var(--white); }
+  .screen-header {
+    background: var(--white);
+    padding: 16px 22px 18px;
+    border-bottom: 1px solid var(--gray-border);
+    flex-shrink: 0;
+  }
+  .screen-header h2 { font-size: 22px; font-weight: 700; color: var(--dark); }
+  .screen-header p { font-size: 13px; color: var(--gray-text); margin-top: 2px; }
+
+  .screen-body {
+    flex: 1;
+    background: var(--gray-bg);
+    overflow-y: auto;
+    padding-bottom: 80px;
+  }
+
+  /* ===== NEW RX SCREEN ===== */
+  #newrx .status-bar { background: var(--white); }
+  .rx-header {
+    background: var(--white);
+    padding: 16px 22px 0;
+    flex-shrink: 0;
+  }
+  .rx-header h2 { font-size: 22px; font-weight: 700; color: var(--dark); margin-bottom: 14px; }
+
+  .step-dots {
+    display: flex; gap: 6px; margin-bottom: 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--gray-border);
+  }
+  .step-dot {
+    height: 6px; border-radius: 3px; background: var(--gray-card);
+    transition: all 0.3s;
+  }
+  .step-dot:first-child { width: 22px; background: var(--navy); }
+  .step-dot:not(:first-child) { width: 14px; }
+
+  .rx-body {
+    flex: 1; background: var(--gray-bg); padding: 22px;
+    overflow-y: auto; padding-bottom: 90px;
+  }
+  .rx-body h3 { font-size: 17px; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
+  .rx-body .rx-sub { font-size: 14px; color: var(--gray-text); margin-bottom: 24px; }
+
+  .rx-footer {
+    position: absolute; bottom: 80px; left: 0; right: 0;
+    background: var(--white);
+    padding: 12px 22px;
+    border-top: 1px solid var(--gray-border);
+  }
+  .btn-next {
+    width: 100%; height: 52px; border-radius: 14px; border: none;
+    background: var(--gray-card); color: var(--gray-text);
+    font-family: var(--font); font-size: 16px; font-weight: 600;
+    cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+
+  /* Stat icon emoji alternatives */
+  .icon-patients::before { content: '👥'; }
+  .icon-rx::before { content: '📋'; }
+  .icon-done::before { content: '✅'; }
+
+  /* Animated teal checkmark for stat */
+  .stat-svg { opacity: 0.8; }
+
+  /* ===== SIGNUP SCREEN ===== */
+  #signup .status-bar { background: var(--navy); color: white; }
+  .role-toggle { display: flex; background: var(--gray-card); border-radius: 12px; padding: 4px; margin-bottom: 10px; }
+  .role-btn { flex: 1; padding: 10px; border-radius: 10px; border: none; font-family: var(--font); font-weight: 600; font-size: 14px; background: transparent; color: var(--gray-text); cursor: pointer; transition: 0.2s; }
+  .role-btn.active { background: var(--white); color: var(--dark); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+  /* ===== PATIENT UI ===== */
+  #patient-home .status-bar, #patient-history .status-bar, #patient-booklet .status-bar { background: var(--navy); color: white; }
+  .timeline { padding: 0 10px; }
+  .timeline-item { position: relative; padding-left: 24px; padding-bottom: 24px; border-left: 2px solid var(--gray-border); }
+  .timeline-item:last-child { border-left: 2px solid transparent; }
+  .timeline-dot { position: absolute; left: -7px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--teal); border: 2px solid var(--gray-bg); }
+  .timeline-date { font-size: 12px; color: var(--gray-text); font-weight: 600; margin-bottom: 4px; }
+  .timeline-content { background: var(--white); border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+  .timeline-content h4 { font-size: 15px; color: var(--dark); margin-bottom: 4px; }
+  .timeline-content p { font-size: 13px; color: var(--gray-text); line-height: 1.4; }
+
+  .booklet-card { background: var(--white); border-radius: 16px; padding: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.03); cursor: pointer; transition: 0.2s; }
+  .booklet-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+  .booklet-icon { width: 48px; height: 48px; border-radius: 14px; background: var(--teal-bg); color: var(--teal-dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .booklet-icon svg { width: 24px; height: 24px; }
+  .booklet-info { flex: 1; }
+  .booklet-info h4 { font-size: 16px; color: var(--dark); margin-bottom: 4px; }
+  .booklet-info p { font-size: 13px; color: var(--gray-text); }
+
+  /* ===== ADMIN UI ===== */
+  #admin-home .status-bar { background: var(--dark); color: white; }
+  .admin-header { background: var(--dark); color: white; padding: 20px 24px 32px; flex-shrink: 0; }
+  .admin-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .admin-header p { font-size: 14px; color: rgba(255,255,255,0.65); }
+  .admin-body { background: var(--gray-bg); flex: 1; border-radius: 28px 28px 0 0; margin-top: -16px; padding: 24px; overflow-y: auto; padding-bottom: 90px; }
+  .admin-card { background: var(--white); border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+  .admin-card-title { font-size: 15px; font-weight: 600; color: var(--dark); display: flex; align-items: center; gap: 10px; }
+  .admin-card-value { font-size: 20px; font-weight: 700; color: var(--teal); }
+
+  .text-link { color: var(--teal); font-weight: 600; cursor: pointer; border: none; background: transparent; font-size: 14px; font-family: var(--font); margin-top: 10px; display: block; text-align: center; width: 100%; transition: opacity 0.2s; }
+  .text-link:hover { opacity: 0.8; }
+
+  /* ===== LANDING PAGE ===== */
+  #landing {
+    overflow-y: auto;
+    background: var(--gray-bg);
+  }
+  .landing-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    width: 100%;
+  }
+  
+  /* Navbar */
+  .landing-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 24px 0;
+  }
+  .landing-logo {
+    font-size: 24px; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 8px;
+  }
+  .landing-logo span { color: var(--teal); }
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a { color: var(--gray-text); text-decoration: none; font-weight: 500; font-size: 15px; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--navy); }
+  .nav-actions { display: flex; gap: 16px; align-items: center; }
+  .btn-outline { background: transparent; border: 1px solid var(--navy); color: var(--navy); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+  .btn-outline:hover { background: var(--navy); color: white; }
+  .btn-solid { background: var(--navy); border: none; color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+  .btn-solid:hover { background: var(--navy-light); }
+
+  /* Hero Section */
+  .hero-section {
+    display: flex; align-items: center; justify-content: space-between; gap: 40px;
+    padding: 60px 0 80px;
+  }
+  .hero-content { flex: 1; max-width: 540px; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; background: var(--teal-bg); color: var(--teal-dark); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 24px; letter-spacing: 0.5px; }
+  .hero-title { font-size: 56px; font-weight: 700; color: var(--navy); line-height: 1.1; margin-bottom: 24px; letter-spacing: -1px; }
+  .hero-subtitle { font-size: 18px; color: var(--gray-text); line-height: 1.5; margin-bottom: 32px; }
+  .hero-actions { display: flex; gap: 16px; align-items: center; margin-bottom: 32px; }
+  .btn-primary { background: var(--navy); color: white; border: none; padding: 16px 28px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+  .btn-primary:hover { background: var(--navy-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,46,74,0.15); }
+  .btn-secondary { background: white; color: var(--navy); border: 1px solid var(--gray-border); padding: 16px 28px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+  .btn-secondary:hover { border-color: var(--navy); color: var(--navy); }
+  .trust-row { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--gray-text); }
+  .avatars { display: flex; }
+  .avatars img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; margin-left: -10px; background: var(--gray-card); }
+  .avatars img:first-child { margin-left: 0; }
+  
+  .hero-image { flex: 1; position: relative; display: flex; justify-content: center; }
+  .hero-card { background: linear-gradient(135deg, #4db899 0%, #3a9e82 100%); padding: 32px; border-radius: 24px; color: white; width: 100%; max-width: 500px; box-shadow: 0 24px 48px rgba(77,184,153,0.25); position: relative; overflow: hidden; }
+  .hero-card::after { content: ''; position: absolute; top: 0; right: 0; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; transform: translate(30%, -30%); }
+  .hc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; position: relative; z-index: 1; }
+  .hc-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .hc-id { font-size: 13px; opacity: 0.8; }
+  .hc-status { background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+  .hc-rx { background: rgba(255,255,255,0.1); padding: 16px; border-radius: 16px; margin-bottom: 16px; position: relative; z-index: 1; }
+  .hc-rx h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .hc-rx p { font-size: 13px; opacity: 0.8; }
+  .hc-stats { display: flex; gap: 12px; position: relative; z-index: 1; }
+  .hc-stat { flex: 1; background: white; color: var(--navy); padding: 16px; border-radius: 16px; }
+  .hc-stat-icon { color: var(--teal); margin-bottom: 8px; }
+  .hc-stat-label { font-size: 12px; color: var(--gray-text); margin-bottom: 2px; }
+  .hc-stat-val { font-size: 16px; font-weight: 700; }
+  .secured-badge { position: absolute; bottom: -20px; left: -20px; background: #8B5E34; color: white; padding: 12px 20px; border-radius: 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 20px rgba(139,94,52,0.3); z-index: 2; }
+  .secured-badge svg { color: #f59e0b; }
+  .secured-badge div { display: flex; flex-direction: column; }
+  .secured-badge span { font-size: 14px; font-weight: 700; }
+  .secured-badge small { font-size: 11px; opacity: 0.8; }
+
+  /* Features Grid */
+  .section-features { padding: 80px 0; background: #f8fafc; text-align: center; }
+  .section-title { font-size: 14px; color: var(--navy); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .section-heading { font-size: 28px; color: var(--gray-text); font-weight: 400; max-width: 600px; margin: 0 auto 60px; line-height: 1.4; }
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; text-align: left; }
+  .feat-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); transition: transform 0.3s; }
+  .feat-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.04); }
+  .feat-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; font-size: 24px; }
+  .feat-card h3 { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 16px; }
+  .feat-card p { font-size: 15px; color: var(--gray-text); line-height: 1.6; }
+
+  /* Mobile App Mockup Section */
+  .section-split { padding: 100px 0; display: flex; align-items: center; gap: 80px; }
+  .split-left { flex: 1; display: flex; justify-content: center; position: relative; }
+  .mockup-frame { width: 320px; height: 650px; background: var(--navy); border-radius: 40px; padding: 10px; box-shadow: 0 30px 60px rgba(26,46,74,0.3); border: 8px solid var(--dark); position: relative; }
+  .mockup-screen { background: var(--gray-bg); width: 100%; height: 100%; border-radius: 32px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+  .mockup-header { background: var(--navy); padding: 40px 20px 20px; color: white; flex-shrink: 0; }
+  .mockup-header h4 { font-size: 20px; font-weight: 700; }
+  .mockup-card { background: white; margin: -20px 20px 10px; border-radius: 16px; padding: 16px; position: relative; z-index: 2; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+  .mockup-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .mockup-card-icon { width: 32px; height: 32px; background: var(--teal-bg); color: var(--teal-dark); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .mockup-card h5 { font-size: 14px; font-weight: 700; color: var(--navy); }
+  .mockup-card .time { font-size: 24px; font-weight: 700; color: var(--navy); margin-top: 8px; }
+  .mockup-badge { position: absolute; right: -20px; top: 50%; background: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--teal-dark); display: flex; align-items: center; gap: 6px; box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+  
+  .split-right { flex: 1; max-width: 500px; }
+  .split-right .section-title { margin-bottom: 16px; }
+  .split-right .section-heading { font-size: 16px; margin: 0 0 40px; text-align: left; }
+  .feature-list { display: flex; flex-direction: column; gap: 32px; }
+  .feat-item { display: flex; gap: 20px; }
+  .feat-item-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
+  .feat-item h4 { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .feat-item p { font-size: 15px; color: var(--gray-text); line-height: 1.5; }
+
+  /* Trusted By */
+  .section-trusted { padding: 40px 0; text-align: center; border-bottom: 1px solid var(--gray-border); }
+  .trusted-title { font-size: 12px; font-weight: 700; color: var(--gray-text); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 32px; }
+  .trusted-logos { display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; }
+  .trusted-logo { display: flex; align-items: center; gap: 10px; color: #9ca3af; font-weight: 700; font-size: 18px; }
+
+  /* CTA Banner */
+  .section-cta { padding: 80px 0; }
+  .cta-box { background: var(--navy); border-radius: 32px; padding: 60px 40px; text-align: center; color: white; }
+  .cta-box h2 { font-size: 36px; font-weight: 700; margin-bottom: 16px; }
+  .cta-box p { font-size: 16px; color: rgba(255,255,255,0.7); max-width: 500px; margin: 0 auto 32px; line-height: 1.5; }
+  .cta-actions { display: flex; justify-content: center; gap: 16px; }
+  .btn-white { background: white; color: var(--navy); border: none; padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+  .btn-white:hover { background: #f0f2f5; }
+  .btn-dark { background: rgba(0,0,0,0.2); color: white; border: none; padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+  .btn-dark:hover { background: rgba(0,0,0,0.3); }
+
+  /* Footer */
+  .landing-footer { padding: 60px 0 40px; border-top: 1px solid var(--gray-border); }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 60px; }
+  .footer-brand p { font-size: 13px; color: var(--gray-text); line-height: 1.6; margin-top: 16px; max-width: 280px; }
+  .footer-col h5 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 20px; }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 12px; }
+  .footer-col ul a { color: var(--gray-text); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+  .footer-col ul a:hover { color: var(--navy); }
+  .footer-bottom { display: flex; justify-content: center; gap: 24px; color: #9ca3af; }
+
+  /* Responsive Adjustments */
+  @media (max-width: 1024px) {
+    .hero-section { flex-direction: column; text-align: center; padding: 40px 0; }
+    .hero-content { max-width: 100%; }
+    .hero-actions { justify-content: center; }
+    .trust-row { justify-content: center; }
+    .hero-image { width: 100%; max-width: 500px; margin: 40px auto 0; }
+    .features-grid { grid-template-columns: 1fr; }
+    .section-split { flex-direction: column; gap: 60px; padding: 60px 0; }
+    .split-right { text-align: center; max-width: 100%; }
+    .split-right .section-heading { text-align: center; margin: 0 auto 40px; }
+    .feat-item { flex-direction: column; align-items: center; text-align: center; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .footer-brand { grid-column: span 2; }
+  }
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .hero-title { font-size: 40px; }
+    .hero-actions { flex-direction: column; width: 100%; }
+    .hero-actions button { width: 100%; justify-content: center; }
+    .cta-actions { flex-direction: column; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .footer-brand { grid-column: span 1; }
+  }
+</style>
 </head>
 <body>
-    <!-- ============ AUTH SCREEN ============ -->
-    <div id="authScreen" class="screen active">
-        <div class="auth-container">
-            <div class="auth-header">
-                <h1>MedTrack</h1>
-                <p>Medicine Intake Tracker</p>
-            </div>
+<div id="app">
 
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" placeholder="your@email.com" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="role">Role</label>
-                    <select id="role" required>
-                        <option value="">Select your role</option>
-                        <option value="doctor">Doctor</option>
-                        <option value="patient">Patient</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Sign In</button>
-            </form>
+  <!-- ========== LANDING PAGE ========== -->
+  <div class="screen active" id="landing">
+    <!-- Navbar -->
+    <div class="landing-container">
+      <nav class="landing-nav">
+        <div class="landing-logo"><span>Med</span>Track</div>
+        <div class="nav-links">
+          <a href="#">Doctors</a>
+          <a href="#">Patients</a>
+          <a href="#">Pricing</a>
+          <a href="#">About</a>
         </div>
+        <div class="nav-actions">
+          <button class="btn-outline" onclick="showScreen('login')">Login</button>
+          <button class="btn-solid" onclick="showScreen('signup')">Sign Up</button>
+        </div>
+      </nav>
     </div>
 
-    <!-- ============ DOCTOR SCREEN ============ -->
-    <div id="doctorScreen" class="screen">
-        <div class="dashboard-container">
-            <!-- Header -->
-            <div class="dashboard-header">
-                <div class="dashboard-title">
-                    <h2>🩺 Doctor Dashboard</h2>
-                </div>
-                <div class="dashboard-user">
-                    <span id="doctorEmail"></span>
-                    <button id="doctorLogout" class="btn btn-outline btn-sm">Logout</button>
-                </div>
+    <!-- Hero -->
+    <div class="landing-container">
+      <div class="hero-section">
+        <div class="hero-content">
+          <div class="badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+            HIPAA COMPLIANT & SECURE
+          </div>
+          <h1 class="hero-title">Your Clinical History,<br>Reimagined.</h1>
+          <p class="hero-subtitle">A modern, digital booklet experience for modern healthcare. Seamless record sharing between practitioners and patients with tactile precision.</p>
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="showScreen('login')">
+              Login as Doctor
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <button class="btn-secondary" onclick="showScreen('login')">Login as Patient</button>
+          </div>
+          <div class="trust-row">
+            <div class="avatars">
+              <img src="https://ui-avatars.com/api/?name=Dr+Jane&background=4db899&color=fff" alt="Dr">
+              <img src="https://ui-avatars.com/api/?name=Dr+Smith&background=1a2e4a&color=fff" alt="Dr">
+              <img src="https://ui-avatars.com/api/?name=Dr+Ali&background=e05c7a&color=fff" alt="Dr">
             </div>
-
-            <!-- Tabs Navigation -->
-            <div class="tabs">
-                <button class="tab-btn active" data-tab="prescriptions-tab">Prescriptions</button>
-                <button class="tab-btn" data-tab="patients-tab">Patients</button>
-                <button class="tab-btn" data-tab="doctor-chat-tab">Chat</button>
-            </div>
-
-            <!-- Tab Contents -->
-            <div class="tab-contents">
-                <!-- Prescriptions Tab -->
-                <div id="prescriptions-tab" class="tab-content active">
-                    <div style="padding: 20px;">
-                        <button id="createPrescriptionBtn" class="btn btn-primary" style="margin-bottom: 20px;">
-                            + New Prescription
-                        </button>
-                        <div id="prescriptionsList"></div>
-                    </div>
-                </div>
-
-                <!-- Patients Tab -->
-                <div id="patients-tab" class="tab-content">
-                    <div style="padding: 20px;">
-                        <div id="patientsList"></div>
-                    </div>
-                </div>
-
-                <!-- Chat Tab -->
-                <div id="doctor-chat-tab" class="tab-content">
-                    <div class="chat-container">
-                        <div class="chat-rooms" id="doctorChatRooms"></div>
-                        
-                        <div id="doctorChatArea" class="chat-area hidden">
-                            <div class="chat-header">
-                                Chat with <span id="doctorChatTitle"></span>
-                            </div>
-                            <div class="chat-messages" id="doctorChatMessages"></div>
-                            <div class="chat-input-area">
-                                <input 
-                                    type="text" 
-                                    id="doctorChatInput" 
-                                    placeholder="Type a message..."
-                                >
-                                <button id="doctorChatSend" class="btn btn-primary btn-sm">Send</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <span>Trusted by 2,000+ Practitioners</span>
+          </div>
         </div>
+        
+        <div class="hero-image">
+          <div class="hero-card">
+            <div class="hc-header">
+              <div>
+                <div class="hc-name">Patient Record: Sarah Jenkins</div>
+                <div class="hc-id">ID: MT-89210-SJ</div>
+              </div>
+              <div class="hc-status">Active File</div>
+            </div>
+            <div class="hc-rx">
+              <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">LATEST PRESCRIPTION</p>
+              <h4>Amoxicillin 500mg</h4>
+              <p>2 times daily for 7 days</p>
+            </div>
+            <div class="hc-stats">
+              <div class="hc-stat">
+                <svg class="hc-stat-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                <div class="hc-stat-label">Blood Pressure</div>
+                <div class="hc-stat-val">120/80</div>
+              </div>
+              <div class="hc-stat">
+                <svg class="hc-stat-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <div class="hc-stat-label">Next Review</div>
+                <div class="hc-stat-val">Oct 24</div>
+              </div>
+            </div>
+            <div class="secured-badge">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <div>
+                <span>Secured Data</span>
+                <small>AES-256 Encryption</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- ============ PATIENT SCREEN ============ -->
-    <div id="patientScreen" class="screen">
-        <div class="dashboard-container">
-            <!-- Header -->
-            <div class="dashboard-header">
-                <div class="dashboard-title">
-                    <h2>💊 Patient Dashboard</h2>
-                </div>
-                <div class="dashboard-user">
-                    <span id="patientEmail"></span>
-                    <button id="patientLogout" class="btn btn-outline btn-sm">Logout</button>
-                </div>
+    <!-- Features Section -->
+    <div class="section-features">
+      <div class="landing-container">
+        <h2 class="section-title">Simplify Prescriptions</h2>
+        <p class="section-heading">Empowering clinicians with tools that reduce administrative burden while ensuring the highest level of patient safety.</p>
+        
+        <div class="features-grid">
+          <div class="feat-card">
+            <div class="feat-icon" style="background: rgba(74, 144, 217, 0.1); color: var(--blue-btn);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             </div>
-
-            <!-- Tabs Navigation -->
-            <div class="tabs">
-                <button class="tab-btn active" data-tab="schedule-tab">Today's Schedule</button>
-                <button class="tab-btn" data-tab="history-tab">30-Day History</button>
-                <button class="tab-btn" data-tab="patient-chat-tab">Chat</button>
+            <h3>Automated Booklets</h3>
+            <p>Instant digital generation of patient medical history booklets that are easy to navigate and share.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon" style="background: rgba(77, 184, 153, 0.1); color: var(--teal);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
-
-            <!-- Tab Contents -->
-            <div class="tab-contents">
-                <!-- Schedule Tab -->
-                <div id="schedule-tab" class="tab-content active">
-                    <div style="padding: 20px;">
-                        <div class="compliance-container">
-                            <svg class="compliance-ring" viewBox="0 0 120 120">
-                                <circle cx="60" cy="60" r="45" fill="none" stroke="#E5E7EB" stroke-width="8"/>
-                                <circle 
-                                    id="ringProgress"
-                                    cx="60" 
-                                    cy="60" 
-                                    r="45" 
-                                    fill="none" 
-                                    stroke="#3B82F6" 
-                                    stroke-width="8"
-                                    stroke-dasharray="282.7"
-                                    stroke-dashoffset="282.7"
-                                    stroke-linecap="round"
-                                    style="transform: rotate(-90deg); transform-origin: 60px 60px; transition: stroke-dashoffset 0.3s ease;"
-                                />
-                                <text id="compliancePercent" x="60" y="75" text-anchor="middle" font-size="28" font-weight="700" fill="#3B82F6">0%</text>
-                            </svg>
-                            <div class="compliance-label">Today's Compliance</div>
-                        </div>
-
-                        <div id="scheduleList" style="padding: 0 20px;"></div>
-                    </div>
-                </div>
-
-                <!-- History Tab -->
-                <div id="history-tab" class="tab-content">
-                    <div class="history-list" id="historyList"></div>
-                </div>
-
-                <!-- Chat Tab -->
-                <div id="patient-chat-tab" class="tab-content">
-                    <div class="chat-container">
-                        <div class="chat-area">
-                            <div class="chat-header">Chat with Doctor</div>
-                            <div class="chat-messages" id="patientChatMessages"></div>
-                            <div class="chat-input-area">
-                                <input 
-                                    type="text" 
-                                    id="patientChatInput" 
-                                    placeholder="Type a message..."
-                                >
-                                <button id="patientChatSend" class="btn btn-primary btn-sm">Send</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <h3>License Verification</h3>
+            <p>Built-in practitioner verification system to maintain the integrity and legality of every prescription.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon" style="background: rgba(224, 92, 122, 0.1); color: var(--red);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="M11 8v2"/><path d="M11 12h.01"/></svg>
             </div>
+            <h3>Smart Diagnostics</h3>
+            <p>Intelligent pattern recognition to help identify chronic trends in patient history records over time.</p>
+          </div>
         </div>
+      </div>
     </div>
 
-    <!-- ============ MODALS ============ -->
-    <div id="modalOverlay" class="modal-overlay hidden"></div>
-
-    <div id="prescriptionModal" class="modal hidden">
-        <div class="modal-header">
-            <h2>Create New Prescription</h2>
-            <button id="closeModalBtn" class="modal-close">&times;</button>
+    <!-- Mockup Section -->
+    <div class="landing-container">
+      <div class="section-split">
+        <div class="split-left">
+          <div class="mockup-frame">
+            <div class="mockup-screen">
+              <div class="mockup-header">
+                <p style="font-size: 12px; opacity: 0.7; margin-bottom: 4px;">Good Morning,</p>
+                <h4>Sarah</h4>
+              </div>
+              <div class="mockup-card">
+                <div class="mockup-card-header">
+                  <div class="mockup-card-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+                  <h5>Smart Reminder</h5>
+                </div>
+                <p style="font-size: 12px; color: var(--gray-text);">Next Medication: Amoxicillin</p>
+                <div class="time">10:30 AM</div>
+                <div class="mockup-badge">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:var(--teal)"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm-2-5l-4-4 1.414-1.414L10 14.172l6.586-6.586L18 9l-8 8z"/></svg>
+                  Profile 98% Complete
+                </div>
+              </div>
+              <div class="mockup-card" style="margin-top: 20px; background: var(--gray-card); box-shadow: none;">
+                <p style="font-size: 12px; color: var(--gray-text); margin-bottom: 8px;">Upcoming Appointment</p>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  <img src="https://ui-avatars.com/api/?name=Dr+Aris&background=1a2e4a&color=fff" style="width: 32px; height: 32px; border-radius: 50%;">
+                  <div>
+                    <h6 style="font-size: 14px; font-weight: 700; color: var(--dark);">Dr. Aris Thorne</h6>
+                    <p style="font-size: 11px; color: var(--gray-text);">General Clinic • 2:30 PM</p>
+                  </div>
+                </div>
+              </div>
+              <div style="padding: 20px;">
+                <button class="btn-primary" style="width: 100%; justify-content: center; font-size: 14px; padding: 12px;">Open Digital Booklet</button>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <form id="prescriptionForm" class="modal-body">
-            <div class="form-group">
-                <label for="rxPatient">Patient</label>
-                <select id="rxPatient" required>
-                    <option value="">Choose a patient</option>
-                </select>
+        <div class="split-right">
+          <h2 class="section-title" style="color: var(--blue-btn);">Your Health in Your Pocket</h2>
+          <p class="section-heading">No more bulky folders or forgotten lab results. Carry your entire medical legacy in a secure, digital format that's as intuitive as turning a page.</p>
+          <div class="feature-list">
+            <div class="feat-item">
+              <div class="feat-item-icon" style="background: rgba(74, 144, 217, 0.1); color: var(--blue-btn);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+              <div>
+                <h4>Digital Booklet</h4>
+                <p>A tactile interface that organizes your records chronologically, just like a physical archive.</p>
+              </div>
             </div>
-
-            <div class="form-group">
-                <label for="rxMedication">Medication Name</label>
-                <input 
-                    type="text" 
-                    id="rxMedication" 
-                    placeholder="e.g., Lisinopril" 
-                    required
-                >
+            <div class="feat-item">
+              <div class="feat-item-icon" style="background: rgba(77, 184, 153, 0.1); color: var(--teal);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+              <div>
+                <h4>Smart Reminders</h4>
+                <p>Adaptive alerts for medications, follow-ups, and health screenings based on your profile.</p>
+              </div>
             </div>
-
-            <div class="form-group">
-                <label for="rxDosage">Dosage</label>
-                <input 
-                    type="text" 
-                    id="rxDosage" 
-                    placeholder="e.g., 10mg" 
-                    required
-                >
+            <div class="feat-item">
+              <div class="feat-item-icon" style="background: rgba(224, 92, 122, 0.1); color: var(--red);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div>
+              <div>
+                <h4>Medical Profile</h4>
+                <p>Centralized data including allergies, chronic conditions, and previous surgeries for emergency readiness.</p>
+              </div>
             </div>
-
-            <div class="form-group">
-                <label for="rxFrequency">Frequency</label>
-                <select id="rxFrequency" required>
-                    <option value="">Select frequency</option>
-                    <option value="Once daily">Once daily</option>
-                    <option value="Twice daily">Twice daily</option>
-                    <option value="Three times daily">Three times daily</option>
-                    <option value="As needed">As needed</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="rxStartDate">Start Date</label>
-                <input type="date" id="rxStartDate" required>
-            </div>
-
-            <div class="form-group">
-                <label for="rxEndDate">End Date</label>
-                <input type="date" id="rxEndDate" required>
-            </div>
-
-            <div class="form-group">
-                <label for="rxNotes">Notes</label>
-                <textarea 
-                    id="rxNotes" 
-                    placeholder="Additional notes for the patient..."
-                    style="width: 100%; padding: 10px 12px; border: 2px solid #E5E7EB; border-radius: 6px; font-family: inherit; font-size: 14px; resize: vertical; min-height: 80px;"
-                ></textarea>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" id="cancelModalBtn" class="btn btn-secondary">Cancel</button>
-                <button type="submit" class="btn btn-primary">Create Prescription</button>
-            </div>
-        </form>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Trusted Logos -->
+    <div class="section-trusted">
+      <div class="landing-container">
+        <h4 class="trusted-title">TRUSTED BY LEADING MEDICAL INSTITUTIONS</h4>
+        <div class="trusted-logos">
+          <div class="trusted-logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> St. Jude Care</div>
+          <div class="trusted-logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Healthency</div>
+          <div class="trusted-logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> PharmaSync</div>
+          <div class="trusted-logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> VitalNode</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA Banner -->
+    <div class="section-cta">
+      <div class="landing-container">
+        <div class="cta-box">
+          <h2>Ready to upgrade your practice?</h2>
+          <p>Join the thousands of healthcare professionals who have transitioned to a safer, more efficient digital record system.</p>
+          <div class="cta-actions">
+            <button class="btn-white" onclick="showScreen('signup')">Get Started Now</button>
+            <button class="btn-dark" onclick="showScreen('signup')">Book a Demo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+      <div class="landing-container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="landing-logo"><span>Med</span>Track</div>
+            <p>© 2026 MedTrack Health Systems. Secure & HIPAA Compliant. Transforming medical documentation through digital tactile innovation.</p>
+          </div>
+          <div class="footer-col">
+            <h5>Product</h5>
+            <ul>
+              <li><a href="#">Features</a></li>
+              <li><a href="#">Pricing</a></li>
+              <li><a href="#">Security</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Resources</h5>
+            <ul>
+              <li><a href="#">Documentation</a></li>
+              <li><a href="#">API Status</a></li>
+              <li><a href="#">Help Center</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Company</h5>
+            <ul>
+              <li><a href="#">About</a></li>
+              <li><a href="#">Contact Support</a></li>
+              <li><a href="#">Terms of Service</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Legal</h5>
+            <ul>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">HIPAA Compliance</a></li>
+              <li><a href="#">Cookie Policy</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ========== LOGIN SCREEN ========== -->
+  <div class="screen" id="login">
+    
+
+    <div class="login-hero">
+      <div class="app-icon">Rx</div>
+      <h1>Welcome back</h1>
+      <p>Sign in to MedTrack</p>
+    </div>
+
+    <div class="login-body">
+      <div class="input-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <input type="email" id="emailInput" placeholder="Email address" oninput="checkForm()">
+      </div>
+      <div class="input-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="passInput" placeholder="Password" oninput="checkForm()">
+        <button class="eye-btn" onclick="togglePass()">
+          <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+
+      <button class="btn-signin" id="signinBtn" onclick="signIn()">Sign in</button>
+      <button class="text-link" onclick="showScreen('signup')">Don't have an account? Sign up</button>
+
+      <div class="divider" style="margin-top: 10px;">or</div>
+
+      <button class="btn-google">
+        <span class="google-g">G</span>
+        Continue with Google
+      </button>
+
+      <div class="bypass-row">
+        <button class="btn-bypass doctor" onclick="bypassDoctor()">Bypass Doctor</button>
+        <button class="btn-bypass patient" onclick="bypassPatient()">Bypass Patient</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SIGNUP SCREEN ========== -->
+  <div class="screen" id="signup">
+    
+
+    <div class="login-hero" style="padding-bottom: 40px;">
+      <div class="app-icon" style="margin-bottom: 16px; width: 48px; height: 48px; font-size: 18px;">Rx</div>
+      <h1>Create account</h1>
+      <p>Join MedTrack today</p>
+    </div>
+
+    <div class="login-body">
+      <div class="role-toggle">
+        <button class="role-btn active" id="rolePatient" onclick="setRole('patient')">Patient</button>
+        <button class="role-btn" id="roleDoctor" onclick="setRole('doctor')">Doctor</button>
+      </div>
+      
+      <div class="input-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <input type="text" id="nameInput" placeholder="Full name" oninput="checkSignupForm()">
+      </div>
+      <div class="input-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <input type="email" id="signupEmailInput" placeholder="Email address" oninput="checkSignupForm()">
+      </div>
+      <div class="input-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="signupPassInput" placeholder="Password" oninput="checkSignupForm()">
+      </div>
+
+      <button class="btn-signin" id="signupBtn" onclick="signUp()" style="margin-top: 10px;">Create Account</button>
+      <button class="text-link" onclick="showScreen('login')">Already have an account? Sign in</button>
+    </div>
+  </div>
+
+  <!-- ========== HOME SCREEN (DOCTOR) ========== -->
+  <div class="screen" id="home">
+    
+
+    <div class="home-hero">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <div class="greeting">Good morning,</div>
+          <div class="dr-name">Dr.</div>
+        </div>
+        <button class="logout-btn" onclick="showScreen('login')" title="Logout">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="stat-num">0</div>
+          <div class="stat-label">Patients</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+          </div>
+          <div class="stat-num">0</div>
+          <div class="stat-label">Active Rx</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+          </div>
+          <div class="stat-num">0</div>
+          <div class="stat-label">Completed</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-body">
+      <div class="section-header">
+        <h3>Recent Prescriptions</h3>
+        <button class="new-rx-link" onclick="showScreen('newrx')">+ New Rx</button>
+      </div>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+        </div>
+        <h4>No prescriptions yet</h4>
+        <p>Create your first prescription using the New Rx tab</p>
+        <button class="btn-create" onclick="showScreen('newrx')">Create prescription</button>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="showScreen('home')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" opacity="0.9"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="nav-item" onclick="showScreen('patients')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Patients</span>
+      </button>
+      <button class="nav-item" onclick="showScreen('newrx')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span>New Rx</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ========== PATIENTS SCREEN ========== -->
+  <div class="screen" id="patients">
+    
+
+    <div class="screen-header">
+      <h2>My Patients</h2>
+      <p>0 patients</p>
+    </div>
+
+    <div class="screen-body">
+      <div class="empty-state" style="margin-top: 40px;">
+        <div class="empty-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="8" x2="23" y2="14" stroke-width="2.5"/><line x1="23" y1="8" x2="17" y2="14" stroke-width="2.5"/></svg>
+        </div>
+        <h4>No patients linked</h4>
+        <p>Patients will appear here once they are assigned to your account</p>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-item" onclick="showScreen('home')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="nav-item active" onclick="showScreen('patients')">
+        <div class="nav-pill">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Patients</span>
+        </div>
+      </button>
+      <button class="nav-item" onclick="showScreen('newrx')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span>New Rx</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ========== NEW RX SCREEN ========== -->
+  <div class="screen" id="newrx">
+    
+
+    <div class="rx-header">
+      <h2>New Prescription</h2>
+      <div class="step-dots">
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+      </div>
+    </div>
+
+    <div class="rx-body">
+      <h3>Select patient</h3>
+      <p class="rx-sub">Choose who this prescription is for</p>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="8" x2="23" y2="14" stroke-width="2.5"/><line x1="23" y1="8" x2="17" y2="14" stroke-width="2.5"/></svg>
+        </div>
+        <h4>No patients linked</h4>
+        <p>Link patients to your account first</p>
+      </div>
+    </div>
+
+    <div class="rx-footer">
+      <button class="btn-next">
+        Next
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-item" onclick="showScreen('home')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="nav-item" onclick="showScreen('patients')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Patients</span>
+      </button>
+      <button class="nav-item active">
+        <div class="nav-pill">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <span>New Rx</span>
+        </div>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ========== PATIENT HOME SCREEN ========== -->
+  <div class="screen" id="patient-home">
+    
+
+    <div class="home-hero">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <div class="greeting">Good morning,</div>
+          <div class="dr-name" id="patientNameDisplay">John Doe</div>
+        </div>
+        <button class="logout-btn" onclick="showScreen('login')" title="Logout">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="home-body" style="padding-top: 24px; padding-inline: 20px;">
+      <div class="booklet-card" onclick="showScreen('patient-history')">
+        <div class="booklet-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div class="booklet-info">
+          <h4>Medical History</h4>
+          <p>View your past diagnoses and allergies</p>
+        </div>
+      </div>
+      
+      <div class="booklet-card" onclick="showScreen('patient-booklet')">
+        <div class="booklet-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+        <div class="booklet-info">
+          <h4>Digital Medical Booklet</h4>
+          <p>Access prescriptions and documents</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="showScreen('patient-home')">
+        <div class="nav-pill">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/></svg>
+          <span>Home</span>
+        </div>
+      </button>
+      <button class="nav-item" onclick="showScreen('patient-history')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span>History</span>
+      </button>
+      <button class="nav-item" onclick="showScreen('patient-booklet')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Booklet</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ========== PATIENT HISTORY SCREEN ========== -->
+  <div class="screen" id="patient-history">
+    
+    
+    <div class="home-hero">
+      <div class="dr-name" style="margin-bottom: 0;">Medical History</div>
+    </div>
+
+    <div class="home-body" style="padding-top: 24px; padding-inline: 20px;">
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">October 2023</div>
+          <div class="timeline-content">
+            <h4>Seasonal Allergies</h4>
+            <p>Diagnosed with mild seasonal allergies. Prescribed antihistamines.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">March 2022</div>
+          <div class="timeline-content">
+            <h4>Annual Checkup</h4>
+            <p>All vitals normal. Recommended standard vitamin D supplementation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-item" onclick="showScreen('patient-home')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="nav-item active" onclick="showScreen('patient-history')">
+        <div class="nav-pill">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>History</span>
+        </div>
+      </button>
+      <button class="nav-item" onclick="showScreen('patient-booklet')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Booklet</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ========== PATIENT BOOKLET SCREEN ========== -->
+  <div class="screen" id="patient-booklet">
+    
+
+    <div class="home-hero">
+      <div class="dr-name" style="margin-bottom: 0;">Digital Booklet</div>
+    </div>
+
+    <div class="home-body" style="padding-top: 24px; padding-inline: 20px;">
+      <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--dark);">Recent Prescriptions</h3>
+      
+      <div class="booklet-card">
+        <div class="booklet-icon" style="background: rgba(74, 144, 217, 0.1); color: var(--blue-btn);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+        </div>
+        <div class="booklet-info">
+          <h4>Amoxicillin 500mg</h4>
+          <p>Dr. Smith • Oct 15, 2023</p>
+          <p style="color: var(--teal); font-weight: 600; font-size: 12px; margin-top: 4px;">Take 2 pills daily for 7 days</p>
+        </div>
+      </div>
+
+      <h3 style="font-size: 16px; margin-bottom: 12px; margin-top: 24px; color: var(--dark);">Medical Documents</h3>
+      
+      <div class="booklet-card">
+        <div class="booklet-icon" style="background: rgba(224, 92, 122, 0.1); color: var(--red);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="booklet-info">
+          <h4>Blood Test Results</h4>
+          <p>LabCorp • Mar 10, 2022</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-item" onclick="showScreen('patient-home')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="nav-item" onclick="showScreen('patient-history')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span>History</span>
+      </button>
+      <button class="nav-item active" onclick="showScreen('patient-booklet')">
+        <div class="nav-pill">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>Booklet</span>
+        </div>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ========== ADMIN HOME SCREEN ========== -->
+  <div class="screen" id="admin-home">
+    
+
+    <div class="admin-header">
+      <h1>Admin Dashboard</h1>
+      <p>System Overview</p>
+    </div>
+
+    <div class="admin-body">
+      <div class="admin-card">
+        <div class="admin-card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Total Doctors
+        </div>
+        <div class="admin-card-value">124</div>
+      </div>
+      <div class="admin-card">
+        <div class="admin-card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--blue-btn)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          Total Patients
+        </div>
+        <div class="admin-card-value">3,492</div>
+      </div>
+      <div class="admin-card">
+        <div class="admin-card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+          Active Prescriptions
+        </div>
+        <div class="admin-card-value">845</div>
+      </div>
+      
+      <button class="btn-create" style="width: 100%; margin-top: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        System Settings
+      </button>
+      
+      <button class="btn-signin active" style="width: 100%; margin-top: 12px; background: var(--gray-card); color: var(--dark); box-shadow: none;" onclick="showScreen('login')">
+        Logout
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentRole = 'patient';
+  let userName = 'Guest';
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function checkForm() {
+    const email = document.getElementById('emailInput').value;
+    const pass = document.getElementById('passInput').value;
+    const btn = document.getElementById('signinBtn');
+    if (email.length > 0 && pass.length > 0) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  }
+
+  function checkSignupForm() {
+    const name = document.getElementById('nameInput').value;
+    const email = document.getElementById('signupEmailInput').value;
+    const pass = document.getElementById('signupPassInput').value;
+    const btn = document.getElementById('signupBtn');
+    if (name.length > 0 && email.length > 0 && pass.length > 0) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  }
+
+  function setRole(role) {
+    currentRole = role;
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+    if (role === 'patient') document.getElementById('rolePatient').classList.add('active');
+    else document.getElementById('roleDoctor').classList.add('active');
+  }
+
+  function signUp() {
+    const btn = document.getElementById('signupBtn');
+    if (btn.classList.contains('active')) {
+      userName = document.getElementById('nameInput').value;
+      if (currentRole === 'patient') {
+        document.getElementById('patientNameDisplay').innerText = userName;
+        showScreen('patient-home');
+      } else {
+        document.querySelector('.dr-name').innerText = 'Dr. ' + userName;
+        showScreen('home');
+      }
+    }
+  }
+
+  function togglePass() {
+    const inp = document.getElementById('passInput');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  function signIn() {
+    const btn = document.getElementById('signinBtn');
+    const email = document.getElementById('emailInput').value;
+    const pass = document.getElementById('passInput').value;
+    
+    if (btn.classList.contains('active')) {
+      if (email === 'admin@medtrack.com' && pass === 'admin123') {
+        showScreen('admin-home');
+      } else {
+        showScreen('home');
+      }
+    }
+  }
+
+  function bypassDoctor() { showScreen('home'); }
+  function bypassPatient() { 
+    document.getElementById('patientNameDisplay').innerText = 'Jane Smith';
+    showScreen('patient-home'); 
+  }
+</script>
 </body>
 </html>
