@@ -24,6 +24,7 @@ import com.joechrist.medtrack.data.remote.dto.PatientSummaryResponse
 // MedTrack – Patients Tab
 // List view: anonymised (anonAlias + masked name) for privacy-safe overview.
 // Detail sheet: full PHI is loaded on drill-down (DOCTOR role sees real name).
+// Updated: Minor UI tweaks included.
 // =============================================================================
 
 @OptIn(ExperimentalMaterial3Api::class)
