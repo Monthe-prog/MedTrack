@@ -37,7 +37,7 @@ android {
             }
         }
 
-        val apiBaseUrl = localProperties.getProperty("ANDROID_API_BASE_URL=https://medtrack-api.onrender.com")
+        val apiBaseUrl = localProperties.getProperty("ANDROID_API_BASE_URL", "https://medtrack-api.onrender.com")
             ?: System.getenv("ANDROID_API_BASE_URL")
             ?: ""
 

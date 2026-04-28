@@ -1,7 +1,3 @@
-// =============================================================================
-// MedTrack Android – settings.gradle.kts
-// =============================================================================
-
 pluginManagement {
     repositories {
         google()
@@ -23,3 +19,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "MedTrack"
 include(":app")
+include(":backend")
+
+project(":app").projectDir = file("android/app")
+project(":backend").projectDir = file("backend")

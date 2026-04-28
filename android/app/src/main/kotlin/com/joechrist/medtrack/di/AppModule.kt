@@ -41,11 +41,11 @@ object FirebaseModule {
     @Provides @Singleton
     fun provideGoogleSignInClient(@ApplicationContext ctx: Context): GoogleSignInClient {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(ctx.getString(com.joechrist.medtrack.R.string.default_web_client_id))
             .requestEmail()
             .build()
         return GoogleSignIn.getClient(ctx, gso)
     }
+
     @Provides @Singleton
     fun provideWorkManager(@ApplicationContext ctx: Context): WorkManager =
         WorkManager.getInstance(ctx)

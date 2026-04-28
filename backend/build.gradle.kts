@@ -28,11 +28,6 @@ application {
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
-repositories {
-    mavenCentral()
-    google()
-}
-
 dependencies {
 
     // ── Ktor Server Core ──────────────────────────────────────────────────────

@@ -1,8 +1,8 @@
 # Stage 1: Build the backend
 FROM gradle:8.5-jdk17 AS build
 COPY --chown=gradle:gradle . /home/gradle/src
-WORKDIR /home/gradle/src/backend
-RUN gradle buildFatJar --no-daemon
+WORKDIR /home/gradle/src
+RUN gradle :backend:buildFatJar --no-daemon
 
 # Stage 2: Run the application
 # Using Eclipse Temurin for better stability and smaller image size

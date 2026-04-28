@@ -11,20 +11,4 @@
 -->
 <resources>
     <string name="app_name">MedTrack</string>
-
-    <!-- Firebase / Google Sign-In -->
-    <!-- google-services plugin derives this from oauth_client[type=3].client_id
-         Since no Web OAuth client is in this google-services.json, the
-         project_number is used as the server client ID fallback.
-         Add a Web OAuth 2.0 client in Firebase Console → Authentication →
-         Sign-in method → Google → Web SDK configuration to populate this. -->
-    <string name="default_web_client_id">949223062344-2dmf83plupdpm49e8qr8fftnia11ari2.apps.googleusercontent.com</string>
-
-    <!-- Firebase project identifiers (used by Firebase SDK auto-init) -->
-    <string name="firebase_database_url"></string>
-    <string name="gcm_defaultSenderId">949223062344</string>
-    <string name="google_app_id">1:949223062344:android:03031e320cbf8deaba517d</string>
-    <string name="google_api_key">AIzaSyAiLIr8Q_F-UZNsUHPYZP4SRlLpa1XQo34</string>
-    <string name="google_storage_bucket">medtrack-8b6a1.firebasestorage.app</string>
-    <string name="project_id">medtrack-8b6a1</string>
 </resources>
